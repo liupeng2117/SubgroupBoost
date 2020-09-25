@@ -72,7 +72,7 @@ RMST.predict.test<-SubgroupBoost.predict(model_RMST, dtest)
 table(RMST.predict.test, simdata[[4]])
 ```
 
-##Win-difference
+## Win-difference
 * Use win-difference based gradient tree boosting method to identify subgroups of patients.
 ```r
 #----- win-ratio ----#
