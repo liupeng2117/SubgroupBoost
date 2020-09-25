@@ -1,0 +1,24 @@
+Package: SubgroupBoost
+Title: Value function Guided Subgrouping via Gradient Tree Boosting
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Peng",
+           family = "Liu",
+           role = c("aut", "cre"),
+           email = "peng.liu9@merck.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: This package is to identify the treatment benefiting and non-benefiting subgroups based on baseline characteristics. It searches for subgorup membership scores by maximizing a RMST or win-ratio based value function that directly reflects the subgroup-treatment interaction effect via gradient tree boosting.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    caret
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.0
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+Depends: 
+    R (>= 2.10),
+    xgboost(>= 1.0.0.2)
