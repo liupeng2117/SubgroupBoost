@@ -49,41 +49,50 @@ info.test=simdata[[2]][,1:5]
 dtest <- xgb.DMatrix(as.matrix(dat.test),label = info.test$trt01p)
 ```
 
-* Before model fitting, we define a function to predict the subgroup assignment. In this function, we first calculate soft assignment probabilities by a sigmoid transformation of predicted value, then seperate the samples into two groups by 0.5 cutoff.  
-```{r predict}
-SubgroupBoost.predict<-function(model, data){
-  # obtain subgroup assignment for dtrain
-  pred<-predict(model, data)
-  prob<-1/(1+exp(-pred))
-  assign<-ifelse(prob>0.5,1,0)
-  return(group_assign=assign)
-}
-
-```
-
 ## RMST
-* Use RMST based gradient tree boosting method to identify subgroups of patients. Here we choose OS as input, as RMST based method can only take one survival outcome.
+* Use RMST based gradient tree boosting method to identify subgroups of patients. Here we choose OS as outcome, as RMST based method can only take one survival outcome.
 ```{r RMST}
 #----- RMST death -----#
 dat1=data.frame(dat.train,trt01p=info.train$trt01p, evnt=info.train$evnt1, aval=info.train$aval1)
+set.seed(123) # for reproducibility
 model_RMST<-SubgroupBoost.RMST(dat1)
 
 #check variables selected
 importance=xgb.importance(model_RMST$feature_names, model_RMST)$Feature
 importance
 
-#calculate prediction accuracy for training data and testing data
+# Get predicted value for each sample in training data
+pred_RMST<-predict(model_RMST, dtrain)
+# Calcualate probabilities of belonging to treatment performing subgroup by sigmoid transformation
+prob_RMST<-1/(1+exp(-pred_RMST))
+#plot the resulting probabilities
+hist(prob_RMST)
+
+#Wrap it up to be a function, use probability 0.5 as cutoff for subgroup label
+SubgroupBoost.predict<-function(model, data){
+  # Get predicted value of model
+  pred<-predict(model, data)
+  # Calcualate probabilities by sigmoid transformation
+  prob<-1/(1+exp(-pred))
+  # Use 0.5 cutoff to seperate samples into two subgroups
+  assign<-ifelse(prob>0.5,1,0)
+  return(group_assign=assign)
+}
+
+#2 by 2 table of predicted and true subgroup label for training and testing data
 RMST.predict.train<-SubgroupBoost.predict(model_RMST, dtrain)
-table(RMST.predict.train, simdata[[3]])
+table(Predicted=RMST.predict.train, True=simdata[[3]])
 
 RMST.predict.test<-SubgroupBoost.predict(model_RMST, dtest)
-table(RMST.predict.test, simdata[[4]])
+table(Predicted=RMST.predict.test, True=simdata[[4]])
 ```
 
 ##Win-difference
-* Use win-difference based gradient tree boosting method to identify subgroups of patients.
+* Use win-difference based gradient tree boosting method to identify subgroups of patients. Here we take both OS and TTP as outcomes for win-ratio, OS surives as the primary endpoint and TTP as the secondary outcome, i.e., surrogate of OS when OS is censored. Win-difference method can take one or multiple outcomes, it can be survival, continous or 
 ```{r Winratio, eval=FALSE}
 #----- win-ratio ----#
+#Specify the type of outcome by argument comparison. For two survival outcomes, set it equals "survival survival". 
+#Note: Make sure the Primary outcome is defined in variable evnt1 and aval1, and secondary outcome is defined by columns evnt2 and aval2 in info.train object, for two survival outcomes case.
 comparison="survival survival"
 model_wd<-SubgroupBoost.wd(dat.train, info.train, comparison)
 
@@ -91,12 +100,12 @@ model_wd<-SubgroupBoost.wd(dat.train, info.train, comparison)
 importance=xgb.importance(model_wd$feature_names, model_wd)$Feature
 importance
 
-#calculate prediction accuracy for training data and testing data
+#2 by 2 table of predicted and true subgroup label for training and testing data
 wd.predict.train<-SubgroupBoost.predict(model_wd, dtrain)
-table(wd.predict.train, simdata[[3]])
+table(Predicted=wd.predict.train, True=simdata[[3]])
 
 wd.predict.test<-SubgroupBoost.predict(model_wd, dtest)
-table(wd.predict.test, simdata[[4]])
+table(Predicted=wd.predict.test, True=simdata[[4]])
 
 ```
 
