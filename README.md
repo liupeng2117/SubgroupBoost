@@ -7,7 +7,7 @@ This tutorial guide the reader through the analysis of treatment performing and 
 You can install the released version of SubgroupBoost from GitHub with:
 
 ``` r
-devtools::install_github("SubgroupBoost")
+devtools::install_github("liupeng2117/SubgroupBoost")
 ```
 
 ## Data input and preprocessing
@@ -64,12 +64,22 @@ model_RMST<-SubgroupBoost.RMST(dat1)
 importance=xgb.importance(model_RMST$feature_names, model_RMST)$Feature
 importance
 
+# [1] "s1"  "z13" "z20" "z18" "z6"  "z15" "z11" "z7"  "z9"  "z4"  "z3"  "z2"  "z10" "z8"  "z19" "z1" 
+
 #calculate prediction accuracy for training data and testing data
 RMST.predict.train<-SubgroupBoost.predict(model_RMST, dtrain)
 table(RMST.predict.train, simdata[[3]])
 
+#RMST.predict.train   0   1
+#                 0 260  79
+#                 1  30 231
+                 
 RMST.predict.test<-SubgroupBoost.predict(model_RMST, dtest)
 table(RMST.predict.test, simdata[[4]])
+
+#RMST.predict.test    0    1
+#                0 2212  504
+#                1  269 2015
 ```
 
 ## Win-difference

@@ -82,10 +82,10 @@ table(RMST.predict.test, simdata[[4]])
 
 ##Win-difference
 * Use win-difference based gradient tree boosting method to identify subgroups of patients.
-```{r Winratio}
+```{r Winratio, eval=FALSE}
 #----- win-ratio ----#
 comparison="survival survival"
-model_wd<-SubgroupBoost.wd(dat, info, comparison)
+model_wd<-SubgroupBoost.wd(dat.train, info.train, comparison)
 
 #check variables selected
 importance=xgb.importance(model_wd$feature_names, model_wd)$Feature

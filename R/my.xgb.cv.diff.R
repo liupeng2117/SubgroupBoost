@@ -29,9 +29,9 @@ my.xgb.cv.diff<-function(    params,
                         early_stopping_rounds # stop if no improvement for 10 consecutive trees
 ){
   n=dim(data)[1]
-  library(caret)
+  #library(caret)
   #set.seed(123)
-  folds<-createFolds(1:n, k=nfold, list=T, returnTrain=TRUE)
+  folds<-caret::createFolds(1:n, k=nfold, list=T, returnTrain=TRUE)
   cv.error<-list()
   for(f in 1:nfold){
      #cat(paste0("Cross-validation fold ",f, "\n"))
