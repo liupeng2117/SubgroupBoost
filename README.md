@@ -46,6 +46,7 @@ dtest <- xgb.DMatrix(as.matrix(dat.test),label = info.test$trt01p)
 ```r
 #----- RMST death -----#
 dat1=data.frame(dat.train,trt01p=info.train$trt01p, evnt=info.train$evnt1, aval=info.train$aval1)
+set.seed(123)
 model_RMST<-SubgroupBoost.RMST(dat1)
 
 #check variables selected
@@ -100,18 +101,31 @@ table(Predicted=RMST.predict.test, True=simdata[[4]])
 #Specify the type of outcome by argument comparison. For two survival outcomes, set it equals "survival survival". 
 #Note: Make sure the Primary outcome is defined in variable evnt1 and aval1, and secondary outcome is defined by columns evnt2 and aval2 in info.train object, for two survival outcomes case.
 comparison="survival survival"
+set.seed(123)
 model_wd<-SubgroupBoost.wd(dat, info, comparison)
 
 #check variables selected
 importance=xgb.importance(model_wd$feature_names, model_wd)$Feature
 importance
 
+# [1] "s1"  "z18" "z20" "z13" "z19"
+
 #2 by 2 table of predicted and true subgroup label for training and testing data
 wd.predict.train<-SubgroupBoost.predict(model_wd, dtrain)
 table(Predicted=wd.predict.train, True=simdata[[3]])
 
+#         True
+#Predicted   0   1
+#        0 287  76
+#        1   3 234
+        
 wd.predict.test<-SubgroupBoost.predict(model_wd, dtest)
 table(Predicted=wd.predict.test, True=simdata[[4]])
+
+#         True
+#Predicted    0    1
+#        0 2436  475
+#        1   45 2044
 
 ```
 

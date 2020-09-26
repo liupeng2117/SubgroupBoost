@@ -94,6 +94,7 @@ table(Predicted=RMST.predict.test, True=simdata[[4]])
 #Specify the type of outcome by argument comparison. For two survival outcomes, set it equals "survival survival". 
 #Note: Make sure the Primary outcome is defined in variable evnt1 and aval1, and secondary outcome is defined by columns evnt2 and aval2 in info.train object, for two survival outcomes case.
 comparison="survival survival"
+set.seed(123)
 model_wd<-SubgroupBoost.wd(dat.train, info.train, comparison)
 
 #check variables selected
