@@ -56,6 +56,23 @@ SubgroupBoost.wd <- function(dat, info, comparison){
 
     return(out)
   }
+      
+  comp.conts<-function(Y1a, Y1b){
+    # if do not belong to any of the cases below(i.e missing), set it to unkown
+    out=0
+
+    if(anyNA(Y1a)==F & anyNA(Y1b)==F){
+      if(Y1a == Y1b) {
+        out=0
+      } else if(Y1a > Y1b){
+        out=-1
+      } else if(Y1a < Y1b){
+        out=1
+      }
+    }
+
+    return(out)
+  }
 
   # get final comparison output from the two comparisons
   get.final.out<-function(out1, out2){
