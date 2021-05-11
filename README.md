@@ -1,10 +1,10 @@
 # SubgroupBoost
 
-This tutorial guide the reader through the analysis of treatment performing and non-performing subgroup identification using our package SubgroupBoost. 
+This tutorial guides users through using our package SubgroupBoost to identify treatment performing and non-performing subgroups. 
 
 ## Installation
 
-You can install the released version of SubgroupBoost from GitHub with:
+Install the released version of SubgroupBoost from GitHub with:
 
 ``` r
 devtools::install_github("liupeng2117/SubgroupBoost")
@@ -16,7 +16,7 @@ devtools::install_github("liupeng2117/SubgroupBoost")
 library(SubgroupBoost)
 ```
 
-* Load data. In this tutorial, we will use a simulated data that comes with SubgroupBoost package to demonstrate. 
+* Load data. In this tutorial, we will use a simulated data that comes with SubgroupBoost package for demonstration. 
 
 ```r
 data("simdata")
