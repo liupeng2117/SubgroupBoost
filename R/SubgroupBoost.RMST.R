@@ -10,35 +10,26 @@
 #' @import xgboost
 #'
 #' @examples NULL
-SubgroupBoost.RMST <- function(dat){
+SubgroupBoost.RMST <- function(dat,tc=99999){
 
-  ### little trick to embed trt01p,aval and evnt into labels for Xgboost input  ###
   N <- nrow(dat)
-  labels <- rep(NA,N)
-  labels[dat$trt01p==1 & dat$evnt==1] <- -1000-dat$aval[dat$trt01p==1 & dat$evnt==1]
-  labels[dat$trt01p==1 & dat$evnt==0] <- -1-dat$aval[dat$trt01p==1 & dat$evnt==0]
-  labels[dat$trt01p==0 & dat$evnt==1] <- 1000+dat$aval[dat$trt01p==0 & dat$evnt==1]
-  labels[dat$trt01p==0 & dat$evnt==0] <- dat$aval[dat$trt01p==0 & dat$evnt==0]
-
+  labels <- dat$trt01p
+  evnt <- dat$evnt
+  aval <- dat$aval
   dat$evnt <- NULL; dat$aval <- NULL; dat$trt01p <- NULL;
+  dtrain <- xgb.DMatrix(as.matrix(dat),label = labels)
+  attr(dtrain, 'evnt') <- evnt
+  attr(dtrain, 'aval') <- aval
+
 
 
   ###  Customized Loss and Error Function ###
 
   Myloss <- function(preds, dtrain) {
-    labels <- getinfo(dtrain, "label")
-
-    ## (0) Decode y to trt01p, aval and evnt ##
-    trt01p<-rep(NA,length(labels))
-    evnt<-rep(NA,length(labels))
-    aval<-rep(NA,length(labels))
-    trt01p[labels< 0] <- 1
-    trt01p[labels>= 0] <- 0
-    evnt[abs(labels)>= (1000)] <- 1
-    evnt[abs(labels)< (1000)] <- 0
-    aval[abs(labels)>= (1000)] <- abs(labels[abs(labels)>= (1000)])-1000
-    aval[labels<0 & labels>-1000] <- -labels[labels<0 & labels>-1000]-1
-    aval[labels>=0 & labels<1000] <- labels[labels>=0 & labels<1000]
+    
+    trt01p <- getinfo(dtrain, "label")
+    evnt <- attr(dtrain, 'evnt') 
+    aval <- attr(dtrain, 'aval')
 
     arm.val <- c(1,0)
     ## (1) Get Time to event Data Ready ##
@@ -48,12 +39,13 @@ SubgroupBoost.RMST <- function(dat){
     km.dat$f <- preds
     km.dat$pred <- 1/(1+exp(-preds))
     km.dat$predg <- exp(preds)/(1+exp(preds))^2
-    km.dat$predh <- exp(preds)*(1-exp(preds))/(1+exp(preds))^3
+    #km.dat$predh <- exp(preds)*(1-exp(preds))/(1+exp(preds))^3
     km.dat<-km.dat[order(km.dat$aval),]
 
 
     ## (2) Set up gradient and Hessian ##
     utime <- unique(km.dat$aval[km.dat$evnt==1])
+    utime <-   utime[utime<=tc]
     dt <- utime-c(0,utime[1:length(utime)-1])
 
     rmst.diff.r1 <- 0
@@ -154,7 +146,7 @@ SubgroupBoost.RMST <- function(dat){
 
     g.p <- (sum(km.dat$pred)*rmst.diff.r1.g + rmst.diff.r1 - sum(1-km.dat$pred)*rmst.diff.r2.g + rmst.diff.r2)
     #h.p <- (2*rmst.diff.r1.g + sum(km.dat$pred)*rmst.diff.r1.h + 2*rmst.diff.r2.g - sum(1-km.dat$pred)*rmst.diff.r2.h)
-    g <-  km.dat$predg*(-1)*g.p
+    g <-  km.dat$predg*(-1/n)*g.p
     #h <- (-1)*( (km.dat$predg)^2 * h.p  + g.p*km.dat$predh)
     g <- g[order(km.dat$id)]
     #h <- h[order(km.dat$id)]
@@ -168,18 +160,9 @@ SubgroupBoost.RMST <- function(dat){
 
 
   evalerror <- function(preds, dtrain) {
-    ## (0) Decode y to trt01p, aval and evnt ##
-    labels <- getinfo(dtrain, "label")
-    trt01p<-rep(NA,length(labels))
-    evnt<-rep(NA,length(labels))
-    aval<-rep(NA,length(labels))
-    trt01p[labels< 0] <- 1
-    trt01p[labels>= 0] <- 0
-    evnt[abs(labels)>= (1000)] <- 1
-    evnt[abs(labels)< (1000)] <- 0
-    aval[abs(labels)>= (1000)] <- abs(labels[abs(labels)>= (1000)])-1000
-    aval[labels<0 & labels>-1000] <- -labels[labels<0 & labels>-1000]-1
-    aval[labels>=0 & labels<1000] <- labels[labels>=0 & labels<1000]
+    trt01p <- getinfo(dtrain, "label")
+    evnt <- attr(dtrain, 'evnt') 
+    aval <- attr(dtrain, 'aval')
 
     arm.val <- c(1,0)
 
@@ -191,6 +174,7 @@ SubgroupBoost.RMST <- function(dat){
 
     ## (2) Set up gradient and Hessian ##
     utime <- unique(km.dat$aval[km.dat$evnt==1])
+    utime <-   utime[utime<=tc]
     dt <- utime-c(0,utime[1:length(utime)-1])
 
     rmst.diff.r1 <- 0
@@ -250,7 +234,7 @@ SubgroupBoost.RMST <- function(dat){
 
     }
 
-    err <- (-1)*( sum(km.dat$pred)*rmst.diff.r1 - sum(1-km.dat$pred)*rmst.diff.r2    )
+    err <- (-1)*( (sum(km.dat$pred)/n)*rmst.diff.r1 - (sum(1-km.dat$pred)/n)*rmst.diff.r2    )
 
     return(list(metric = "OTR_error", value = err))
   }
