@@ -10,7 +10,7 @@
 #' @import xgboost
 #'
 #' @examples NULL
-SubgroupBoost.RMST <- function(dat,tc=99999){
+SubgroupBoost.RMST <- function(dat,tc=99999,eta = c(.005, .01),max_depth = c(2,4,6) ){
 
   N <- nrow(dat)
   labels <- dat$trt01p
@@ -246,8 +246,8 @@ SubgroupBoost.RMST <- function(dat,tc=99999){
 
   hyper_grid <- expand.grid(
     #eta = c(0.001,.005, .01, .05, .1),
-    eta = c(.005, .01),
-    max_depth = c(2,4,6),
+    eta = eta,
+    max_depth = max_depth,
     #subsample = c(.65, .8, 1),
     #colsample_bytree = c(.8, 1),
     #lambda =c(1,3,5),
@@ -281,7 +281,7 @@ SubgroupBoost.RMST <- function(dat,tc=99999){
       eval_metric = evalerror,
       maximize=F,
       verbose = 0,               # silent,
-      early_stopping_rounds = 5 # stop if no improvement for 10 consecutive trees
+      early_stopping_rounds = 10 # stop if no improvement for 10 consecutive trees
     )
 
     # add min training error and trees to grid
