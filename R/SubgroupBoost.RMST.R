@@ -273,8 +273,8 @@ SubgroupBoost.RMST <- function(dat,tc=99999,eta = c(.005, .01),max_depth = c(2,4
     # train model
     xgb.tune <- xgb.cv(
       params = params,
-      data = as.matrix(dat),
-      label = labels,
+      data = dtrain,
+      label = NULL,
       nrounds = 500,
       nfold = 5,
       objective = Myloss,
