@@ -295,7 +295,7 @@ SubgroupBoost.RMST <- function(dat,tc=99999,eta = c(.005, .01),max_depth = c(2,4
   hyper_grid <- hyper_grid[order(hyper_grid$min_error),]
   cat(" Top Five Fitting per CV \n")
   print (hyper_grid[1:5,])
-  dtrain <- xgb.DMatrix(as.matrix(dat),label = labels)
+
   param <- list(max_depth = hyper_grid$max_depth[1], eta = hyper_grid$eta[1], silent = 1,
                 objective = Myloss, eval_metric = evalerror,verbose = 1,lambda=1,base_score=0,colsample_bytree=1,min_child_weight=0)
   watchlist <- list(train = dtrain)
