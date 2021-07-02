@@ -22,7 +22,7 @@
 #' @import xgboost
 #'
 #' @examples NULL
-SubgroupBoost.wd <- function(dat, info, comparison){
+SubgroupBoost.wd <- function(dat, info, comparison,eta = c(.005, .01),max_depth = c(2,4)){
   #dat contains only predictive variables, info contains treatment and outcomes
 
   ## ----- Define comparison rule ------ ##
@@ -361,8 +361,8 @@ SubgroupBoost.wd <- function(dat, info, comparison){
 
   hyper_grid <- expand.grid(
     #eta = c(0.001,.005, .01, .05, .1),
-    eta = c(.005, .01),
-    max_depth = c(2,4),
+    eta = eta,
+    max_depth =max_depth,
     #subsample = c(.65, .8, 1),
     #colsample_bytree = c(.8, 1),
     #lambda =c(1,3,5),
