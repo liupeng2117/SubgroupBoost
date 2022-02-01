@@ -146,7 +146,7 @@ SubgroupBoost.RMST <- function(dat,tc=99999,eta = c(.005, .01),max_depth = c(2,4
 
     g.p <- (sum(km.dat$pred)*rmst.diff.r1.g + rmst.diff.r1 - sum(1-km.dat$pred)*rmst.diff.r2.g + rmst.diff.r2)
     #h.p <- (2*rmst.diff.r1.g + sum(km.dat$pred)*rmst.diff.r1.h + 2*rmst.diff.r2.g - sum(1-km.dat$pred)*rmst.diff.r2.h)
-    g <-  km.dat$predg*(-1)*g.p
+    g <-  km.dat$predg*(-1/n)*g.p
     #h <- (-1)*( (km.dat$predg)^2 * h.p  + g.p*km.dat$predh)
     g <- g[order(km.dat$id)]
     #h <- h[order(km.dat$id)]
