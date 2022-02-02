@@ -102,7 +102,7 @@ table(Predicted=RMST.predict.test, True=simdata[[4]])
 #Note: Make sure the Primary outcome is defined in variable evnt1 and aval1, and secondary outcome is defined by columns evnt2 and aval2 in info.train object, for two survival outcomes case. You can update xgboost parameters eta and max_depth in SubgroupBoost.wd. The default is to search among eta = c(.005, .01),max_depth = c(2,4,6) via CV to find the optimal values.
 comparison="survival survival"
 set.seed(123)
-model_wd<-SubgroupBoost.wd(dat, info, comparison)
+model_wd<-SubgroupBoost.wd(dat.train, info.train, comparison)
 
 #check variables selected
 importance=xgb.importance(model_wd$feature_names, model_wd)$Feature
